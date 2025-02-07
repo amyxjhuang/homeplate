@@ -27,13 +27,15 @@ int main() {
 
     for (size_t i = 0; i < contours.size(); i++) {
         vector<Point> approx;
-        double peri = arcLength(contours[i], true);
-        approxPolyDP(contours[i], approx, 0.02 * peri, true);
+        double perimeter = arcLength(contours[i], true);
+        double epsilon = 0.018 * perimeter;
+        bool closed = true;
+        approxPolyDP(contours[i], approx, epsilon, closed);
 
-        // Assuming we could see 5 points
-        // if (approx.size() == 5) {
-            drawContours(image, vector<vector<Point>>{approx}, -1, Scalar(0, 255, 0), 3);
-        // }
+        // // Assuming we could see 5 points
+        if (approx.size() > 2 && approx.size() < 7) {
+            drawContours(image, vector<vector<Point>>{approx}, -1, Scalar(0, 255, 0), 1);
+        }
     }
 
     imshow("Home Plate Detection", image);
