@@ -8,6 +8,9 @@ g++ -o detect_home_plate detect_home_plate.cpp `pkg-config --cflags --libs openc
 ./detect_home_plate
 ```
 
-Applying bounds and only counting polygons between 3 and 6 sides 
+Constraints:
+- added bounds (assuming near the center of the image)
+- limit the height and width of the polygon
+- polygon has approx between 3 and 6 sides 
 
-![Screenshot 2025-02-07 at 8 34 49 PM](https://github.com/user-attachments/assets/6190f1f4-861c-461f-9cef-10356381ce9a)
+![Screenshot 2025-02-07 at 8 40 46 PM](https://github.com/user-attachments/assets/e2aee40d-f704-489c-b25e-33b89b8cc913)
