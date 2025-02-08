@@ -25,7 +25,7 @@ bool isPointWithinBounds(Point point, Mat image) {
 
 
 int main() {
-    Mat image = imread("images/test1.jpg");
+    Mat image = imread("images/test2.png");
     if (image.empty()) {
         cout << "Error reading image" << endl;
         return -1;
