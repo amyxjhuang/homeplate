@@ -45,15 +45,25 @@ int main() {
     vector<Vec4i> hierarchy;
     findContours(edges, contours, hierarchy, RETR_TREE, CHAIN_APPROX_SIMPLE);
 
+    // Let's assume the polygon can't be more than 1/5th the width of the image, 
+    // or more than 5% of the area of the image 
+    double maxPerimeter = 0.2 * image.cols;
+    double maxArea = 0.05 * image.cols * image.rows;
+
     for (size_t i = 0; i < contours.size(); i++) {
         vector<Point> approx;
         double perimeter = arcLength(contours[i], true);
         double epsilon = 0.018 * perimeter;
         bool closed = true;
+
+
+
         approxPolyDP(contours[i], approx, epsilon, closed);
 
+        double area = contourArea(contours[i]);
+
         // // Assuming we could see 5 points
-        if (approx.size() > 2 && approx.size() < 7) {
+        if (approx.size() > 2 && approx.size() < 7 && perimeter < maxPerimeter && area < maxArea) {
             Moments m = moments(contours[i]);
             Point2f center(m.m10/m.m00, m.m01/m.m00);
 
