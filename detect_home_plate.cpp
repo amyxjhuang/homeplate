@@ -4,6 +4,26 @@
 using namespace cv;
 using namespace std;
 
+bool isPointWithinBounds(Point point, Mat image) {
+    // Assume that the home plate is within these bounds
+    double topMargin = 0.4; 
+    double bottomMargin = 0.1;
+    double leftMargin = 0.1;
+    double rightMargin = 0.1;
+
+    // Calculate the center of the image
+    int imageWidth = image.cols;
+    int imageHeight = image.rows;
+
+        
+    int leftBound = imageWidth * leftMargin;
+    int rightBound = imageWidth * (1 - rightMargin);
+    int topBound = imageHeight * topMargin;
+    int bottomBound = imageHeight * (1 - bottomMargin);
+    return (point.x > leftBound && point.x < rightBound && point.y > topBound && point.y < bottomBound);
+}
+
+
 int main() {
     Mat image = imread("images/test1.jpg");
     if (image.empty()) {
@@ -34,7 +54,12 @@ int main() {
 
         // // Assuming we could see 5 points
         if (approx.size() > 2 && approx.size() < 7) {
-            drawContours(image, vector<vector<Point>>{approx}, -1, Scalar(0, 255, 0), 1);
+            Moments m = moments(contours[i]);
+            Point2f center(m.m10/m.m00, m.m01/m.m00);
+
+            if (isPointWithinBounds(center, image)) {
+                drawContours(image, vector<vector<Point>>{approx}, -1, Scalar(0, 255, 0), 1);
+            }
         }
     }
 
