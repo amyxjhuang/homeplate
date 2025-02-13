@@ -25,7 +25,7 @@ bool isPointWithinBounds(Point point, Mat image) {
 
 
 int main() {
-    Mat image = imread("images/test1.jpg");
+    Mat image = imread("images/test0.jpg");
     if (image.empty()) {
         cout << "Error reading image" << endl;
         return -1;
@@ -40,6 +40,8 @@ int main() {
 
     Mat edges;
     Canny(blurred, edges, 50, 150);
+
+    SimpleBlobDetector::Params blobParams;
 
     vector<vector<Point>> contours;
     vector<Vec4i> hierarchy;
