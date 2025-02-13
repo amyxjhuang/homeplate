@@ -23,9 +23,30 @@ bool isPointWithinBounds(Point point, Mat image) {
     return (point.x > leftBound && point.x < rightBound && point.y > topBound && point.y < bottomBound);
 }
 
+SimpleBlobDetector::Params getBlobParams(Mat image) {
+    SimpleBlobDetector::Params params;
+
+    params.filterByArea = true;
+    params.minArea = 100;
+    params.maxArea = 0.05 * image.cols * image.rows;  // Same max area as before
+    
+    // Filter by circularity
+    params.filterByCircularity = true;
+    params.minCircularity = 0.1;
+    
+    // Filter by convexity
+    params.filterByConvexity = true;
+    params.minConvexity = 0.5;
+    
+    // Filter by inertia (elongation)
+    params.filterByInertia = true;
+    params.minInertiaRatio = 0.01;
+    return params;
+
+}
 
 int main() {
-    Mat image = imread("images/test0.jpg");
+    Mat image = imread("images/test1.jpg");
     if (image.empty()) {
         cout << "Error reading image" << endl;
         return -1;
@@ -41,7 +62,19 @@ int main() {
     Mat edges;
     Canny(blurred, edges, 50, 150);
 
-    SimpleBlobDetector::Params blobParams;
+    SimpleBlobDetector::Params blobParams = getBlobParams(image);
+    Ptr<SimpleBlobDetector> detector = SimpleBlobDetector::create(blobParams);
+    
+    // Detect blobs
+    vector<KeyPoint> keypoints;
+    detector->detect(blurred, keypoints);
+    
+    // Draw detected blobs in red
+    for (const KeyPoint& kp : keypoints) {
+        if (isPointWithinBounds(Point(kp.pt.x, kp.pt.y), image)) {
+            circle(image, Point(kp.pt.x, kp.pt.y), kp.size/2, Scalar(0, 0, 255), 2);
+        }
+    }
 
     vector<vector<Point>> contours;
     vector<Vec4i> hierarchy;
