@@ -31,8 +31,8 @@ SimpleBlobDetector::Params getBlobParams(Mat image) {
     params.maxArea = 0.05 * image.cols * image.rows;  // Same max area as before
     
     // Filter by circularity
-    params.filterByCircularity = true;
-    params.minCircularity = 0.1;
+    // params.filterByCircularity = true;
+    // params.minCircularity = 0.1;
     
     // Filter by convexity
     params.filterByConvexity = true;
