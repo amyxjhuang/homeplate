@@ -26,9 +26,9 @@ bool isPointWithinBounds(Point point, Mat image) {
 SimpleBlobDetector::Params getBlobParams(Mat image) {
     SimpleBlobDetector::Params params;
 
-    params.filterByArea = true;
-    params.minArea = 100;
-    params.maxArea = 0.05 * image.cols * image.rows;  // Same max area as before
+    // params.filterByArea = true;
+    // params.minArea = 100;
+    // params.maxArea = 0.05 * image.cols * image.rows;  // Same max area as before
     
     // Filter by circularity
     params.filterByCircularity = true;
@@ -40,7 +40,7 @@ SimpleBlobDetector::Params getBlobParams(Mat image) {
     
     // Filter by inertia (elongation)
     params.filterByInertia = true;
-    params.minInertiaRatio = 0.01;
+    params.maxInertiaRatio = 0.80;
     return params;
 
 }
@@ -62,23 +62,39 @@ int main() {
     Mat edges;
     Canny(blurred, edges, 50, 150);
 
+    cout << "Getting blob params for blob detection" << endl;
     SimpleBlobDetector::Params blobParams = getBlobParams(image);
     Ptr<SimpleBlobDetector> detector = SimpleBlobDetector::create(blobParams);
     
     // Detect blobs
     vector<KeyPoint> keypoints;
-    detector->detect(blurred, keypoints);
-    
-    // Draw detected blobs in red
-    for (const KeyPoint& kp : keypoints) {
-        if (isPointWithinBounds(Point(kp.pt.x, kp.pt.y), image)) {
-            circle(image, Point(kp.pt.x, kp.pt.y), kp.size/2, Scalar(0, 0, 255), 2);
-        }
-    }
+    // detector->detect(blurred, keypoints);
 
+    Mat blobMask;
+    detector->detect(gray, keypoints, blobMask);
     vector<vector<Point>> contours;
     vector<Vec4i> hierarchy;
-    findContours(edges, contours, hierarchy, RETR_TREE, CHAIN_APPROX_SIMPLE);
+    cout << "Finding blob contours" << endl;
+    findContours(blobMask, contours, hierarchy, RETR_EXTERNAL, CHAIN_APPROX_SIMPLE);
+
+    // Draw detected blob contours in red
+    for (const auto& contour : contours) {
+        cout << "Drawing blob contours" << endl;
+        drawContours(image, vector<vector<Point>>{contour}, 0, Scalar(0, 0, 255), 2);
+    }
+    
+    // Draw detected blobs in red
+    // for (const KeyPoint& kp : keypoints) {
+    //     if (isPointWithinBounds(Point(kp.pt.x, kp.pt.y), image)) {
+    //         circle(image, Point(kp.pt.x, kp.pt.y), kp.size/2, Scalar(0, 0, 255), 2);
+    //     }
+    // }
+    // }
+
+
+    // vector<vector<Point>> contours;
+    // vector<Vec4i> hierarchy;
+    // findContours(edges, contours, hierarchy, RETR_TREE, CHAIN_APPROX_SIMPLE);
 
     // Let's assume the polygon can't be more than 1/5th the width of the image, 
     // or more than 5% of the area of the image 
