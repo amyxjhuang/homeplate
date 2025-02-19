@@ -26,30 +26,28 @@ bool isPointWithinBounds(Point point, Mat image) {
 SimpleBlobDetector::Params getBlobParams() {
     SimpleBlobDetector::Params params;
 
-    params.maxArea = 1300;
-    params.minThreshold = 254;
+    params.minThreshold = 200;
     params.maxThreshold = 255;
     params.minRepeatability = 1;
     
-    params.filterByArea = true;
-    params.minArea = 700;
-    
+    // params.filterByArea = true;
+    // params.minArea = 500;
+    // params.maxArea = 1300;
+
     params.filterByCircularity = true;
-    params.minCircularity = 0.3f;
-    params.maxCircularity = 0.6f;
+    params.minCircularity = 0.1f;
+    params.maxCircularity = 0.9f;
     
     params.filterByConvexity = false;
     params.minConvexity = 0.1f;
     
-    params.filterByInertia = false;
+    params.filterByInertia = true;
     params.minInertiaRatio = 0.11f;
     return params;
 
 }
 
-void CustomHomePlateFind() {
-    std::string ImagePath = "../images/test1.jpg";
-    
+void CustomHomePlateFind(const std::string& ImagePath) {    
     std::cout << "FileName " << ImagePath << std::endl;
     
     cv::Mat matBGR = cv::imread(ImagePath);
@@ -100,71 +98,14 @@ void CustomHomePlateFind() {
     cv::waitKey(0);
 }
 
-int main() {
-    // Mat image = imread("../images/test1.jpg");
-    // if (image.empty()) {
-    //     cout << "Error reading image" << endl;
-    //     return -1;
-    // }
-    // cout << "Converting to gray & gaussian blur" << endl;
+int main(int argc, char** argv) {
+    if (argc != 2) {
+        std::cout << "No path to image specified, using default" << std::endl;
+        CustomHomePlateFind("../images/test1.jpg");
 
-    // Mat gray;
-    // cvtColor(image, gray, COLOR_BGR2GRAY);
-
-    // Mat blurred;
-    // GaussianBlur(gray, blurred, Size(5, 5), 0);
-
-    // Mat edges;
-    // Canny(blurred, edges, 50, 150);
-
-    // SimpleBlobDetector::Params blobParams = getBlobParams(image);
-    // Ptr<SimpleBlobDetector> detector = SimpleBlobDetector::create(blobParams);
+        return -1;
+    }
     
-    // // Detect blobs
-    // vector<KeyPoint> keypoints;
-    // detector->detect(blurred, keypoints);
-    
-    // // Draw detected blobs in red
-    // for (const KeyPoint& kp : keypoints) {
-    //     if (isPointWithinBounds(Point(kp.pt.x, kp.pt.y), image)) {
-    //         circle(image, Point(kp.pt.x, kp.pt.y), kp.size/2, Scalar(0, 0, 255), 2);
-    //     }
-    // }
-
-    // vector<vector<Point>> contours;
-    // vector<Vec4i> hierarchy;
-    // findContours(edges, contours, hierarchy, RETR_TREE, CHAIN_APPROX_SIMPLE);
-
-    // // Let's assume the polygon can't be more than 1/5th the width of the image, 
-    // // or more than 5% of the area of the image 
-    // double maxPerimeter = 0.2 * image.cols;
-    // double maxArea = 0.05 * image.cols * image.rows;
-
-    // for (size_t i = 0; i < contours.size(); i++) {
-    //     vector<Point> approx;
-    //     double perimeter = arcLength(contours[i], true);
-    //     double epsilon = 0.018 * perimeter;
-    //     bool closed = true;
-
-
-
-    //     approxPolyDP(contours[i], approx, epsilon, closed);
-
-    //     double area = contourArea(contours[i]);
-
-    //     // // Assuming we could see 5 points
-    //     if (approx.size() > 2 && approx.size() < 7 && perimeter < maxPerimeter && area < maxArea) {
-    //         Moments m = moments(contours[i]);
-    //         Point2f center(m.m10/m.m00, m.m01/m.m00);
-
-    //         if (isPointWithinBounds(center, image)) {
-    //             drawContours(image, vector<vector<Point>>{approx}, -1, Scalar(0, 255, 0), 1);
-    //         }
-    //     }
-    // }
-
-    // imshow("Home Plate Detection", image);
-    // waitKey(0);
-    CustomHomePlateFind();
+    CustomHomePlateFind(argv[1]);
     return 0;
 }
