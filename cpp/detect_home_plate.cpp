@@ -4,7 +4,30 @@
 using namespace cv;
 using namespace std;
 
-bool isPointWithinBounds(Point point, Mat image) {
+cv::Rect getBoundsRect(const cv::Mat& image) {
+
+    double topMargin = 0.4; 
+    double bottomMargin = 0.1;
+    double leftMargin = 0.1;
+    double rightMargin = 0.1;
+
+    // Calculate the center of the image
+    int imageWidth = image.cols;
+    int imageHeight = image.rows;
+    int leftBound = imageWidth * leftMargin;
+    int rightBound = imageWidth * (1 - rightMargin);
+    int topBound = imageHeight * topMargin;
+    int bottomBound = imageHeight * (1 - bottomMargin);
+    return cv::Rect(
+        leftBound,                    
+        topBound,                     
+        rightBound - leftBound,    
+        bottomBound - topBound      
+    );
+
+}
+
+bool isPointWithinBounds(const cv::KeyPoint& keypoint, const cv::Mat& image) {
     // Assume that the home plate is within these bounds
     double topMargin = 0.4; 
     double bottomMargin = 0.1;
@@ -14,13 +37,14 @@ bool isPointWithinBounds(Point point, Mat image) {
     // Calculate the center of the image
     int imageWidth = image.cols;
     int imageHeight = image.rows;
-
         
     int leftBound = imageWidth * leftMargin;
-    int rightBound = imageWidth * (1 - rightMargin);
+    int rightBound = imageWidth * (1 - leftMargin);
     int topBound = imageHeight * topMargin;
     int bottomBound = imageHeight * (1 - bottomMargin);
-    return (point.x > leftBound && point.x < rightBound && point.y > topBound && point.y < bottomBound);
+
+    return (keypoint.pt.x > leftBound && keypoint.pt.x < rightBound && 
+            keypoint.pt.y > topBound && keypoint.pt.y < bottomBound);
 }
 
 SimpleBlobDetector::Params getBlobParams() {
@@ -84,15 +108,21 @@ void CustomHomePlateFind(const std::string& ImagePath) {
     
     std::cout << "Keypoints found " << keypoints.size() << std::endl;
     
+    std::vector<cv::KeyPoint> filteredKeypoints;
     for (const auto& key : keypoints) {
-        std::cout << "Keypoint found size " << key.size << " x " << key.pt.x << " y " << key.pt.y << std::endl;
+        if (isPointWithinBounds(key, matGray)) {
+            std::cout << "Keypoint found size " << key.size << " x " << key.pt.x << " y " << key.pt.y << std::endl;
+            filteredKeypoints.push_back(key);
+            
+        }
+    
     }
     
     // Draw keypoints
     cv::Mat imageWithKeypoints;
     cv::cvtColor(matGray, imageWithKeypoints, cv::COLOR_GRAY2BGR);
-    cv::drawKeypoints(imageWithKeypoints, keypoints, imageWithKeypoints, cv::Scalar(0, 0, 255), cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
-    
+    cv::drawKeypoints(imageWithKeypoints, filteredKeypoints, imageWithKeypoints, cv::Scalar(0, 0, 255), cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
+    cv::rectangle(imageWithKeypoints, getBoundsRect(imageWithKeypoints), cv::Scalar(0,255,0), 2);
     // Display the result
     cv::imshow("Found Blobs", imageWithKeypoints);
     cv::waitKey(0);
